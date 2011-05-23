@@ -1,0 +1,36 @@
+## Net::HTTP::Stats
+
+This module provides statistics when downloading a file through Net::HTTP. Thus
+it's possible notice user about progression or to set rules to interrupt a
+download if remaining time is too long.
+
+Example printing progression while downloading.
+
+    require 'net/http' 
+    require 'net/http/stats' 
+
+    content = ''
+    uri = URI.parse('http://ftp.ruby-lang.org/pub/ruby/1.8/ruby-1.8.6.tar.gz') 
+    response = Net::HTTP.get_response_with_stats(uri) do |resp, bytes| 
+      content << bytes 
+      puts "#{resp.bytes_percent}% downloaded at #{(resp.bytes_rate / 1024).to_i} Ko/s, remaining #{resp.left_time.to_i} seconds" 
+    end
+    This script will print something like:
+    13% downloaded at 59 Ko/s, remaining 65 seconds
+    See Net::HTTP::Stats to know more about attributes.
+
+Example with download rules.
+
+    rules = {
+      :max_time => 5 * 60,
+      :max_left_time => 5 * 60,
+      :max_size => 50 * 1024 * 1024,
+      :min_time => 15
+    }
+
+    content = ''
+    uri = URI.parse('http://ftp.ruby-lang.org/pub/ruby/1.8/ruby-1.8.6.tar.gz')
+    response = Net::HTTP.get_response_with_rules(uri, rules) do |resp, bytes|
+      content << bytes
+    end
+
